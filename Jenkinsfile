@@ -1,7 +1,7 @@
-def build(target, nodeLabel='osx', configuration='Release', swift_version='3.0') {
+def build(target, swift_version) {
   return {
-    node(nodeLabel) {
-      def stageName = "${target} ${configuration.toLowerCase()} swift-${swift_version}"
+    node('osx') {
+      def stageName = "${target} swift-${swift_version}"
       stage(stageName) {
         // SCM
         sh 'rm -rf *'
@@ -35,25 +35,32 @@ try {
     )
   }
 
-  // Touchstones
   parallel([
-    swiftlint: build('swiftlint'),
-    docs: build('docs'),
-    osx_swift: build('osx-swift'),
-  ])
+    // Swift 2.2
+    osx: build('osx', '2.2'),
+    docs: build('docs', '2.2'),
+    ios_static: build('ios-static', '2.2'),
+    ios_dynamic: build('ios-dynamic', '2.2'),
+    ios_swift: build('ios-swift', '2.2'),
+    osx_swift: build('osx-swift', '2.2'),
+    watchos: build('watchos', '2.2'),
+    cocoapods: build('cocoapods', '2.2'),
+    swiftlint: build('swiftlint', '2.2'),
+    tvos: build('tvos', '2.2'),
+    osx_encryption: build('osx-encryption', '2.2'),
 
-  node {
-    step([
-      $class: 'GitHubSetCommitStatusBuilder',
-      statusMessage: [content: 'Jenkins CI job in progress (touchstones passed)']]
-    )
-  }
-
-  parallel([
-    // OS X
-    osx_release: build('osx', 'osx', 'Release'),
-    osx_debug: build('osx', 'osx', 'Debug'),
-    osx_encryption: build('osx-encryption'),
+    // Swift 3.0
+    osx: build('osx', '3.0'),
+    docs: build('docs', '3.0'),
+    ios_static: build('ios-static', '3.0'),
+    ios_dynamic: build('ios-dynamic', '3.0'),
+    ios_swift: build('ios-swift', '3.0'),
+    osx_swift: build('osx-swift', '3.0'),
+    watchos: build('watchos', '3.0'),
+    cocoapods: build('cocoapods', '3.0'),
+    swiftlint: build('swiftlint', '3.0'),
+    tvos: build('tvos', '3.0'),
+    osx_encryption: build('osx-encryption', '3.0'),
   ])
 
   // Mark build as successful if we get this far

@@ -11,8 +11,6 @@ while pgrep -q Simulator; do
     pkill -9 Simulator 2>/dev/null || true
 done
 
-exit 0
-
 # Shut down simulators until there's no booted ones left
 # Only do one at a time because devices sometimes show up multiple times
 while xcrun simctl list | grep -q Booted; do
@@ -52,3 +50,5 @@ done
         fi
     done
 )
+
+xcrun simctl boot "$(xcrun simctl list devices | grep -v unavailable | grep -m 1 -o '[0-9A-F\-]\{36\}')"

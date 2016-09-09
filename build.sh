@@ -926,7 +926,8 @@ EOM
             defaults write com.apple.CoreSimulator DebugLogging -bool YES
 
             sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || \
-                (echo "\n\n***\nbuild/build.log\n***\n\n" && cat build/build.log && exit 1)
+                (echo "\n\n***\nbuild/build.log\n***\n\n" && cat build/build.log && 
+                 echo "\n\n***\nCoreSimulator.log\n***\n\n" && tail -n2000 ~/Library/Logs/CoreSimulator/CoreSimulator.log && exit 1)
         fi
 
         if [ "$target" = "osx" ] && [ "$configuration" = "Debug" ]; then

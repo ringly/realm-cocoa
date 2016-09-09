@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$(dirname "$0")/swift-version.sh"
+
 set -o pipefail
 set -e
 
@@ -51,4 +53,6 @@ done
     done
 )
 
-xcrun simctl boot "$(xcrun simctl list devices | grep -v unavailable | grep -m 1 -o '[0-9A-F\-]\{36\}')"
+if [[ -a "${DEVELOPER_DIR}/Applications/Simulator.app" ]]; then
+    open "${DEVELOPER_DIR}/Applications/Simulator.app"
+fi

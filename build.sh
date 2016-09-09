@@ -608,7 +608,7 @@ case "$COMMAND" in
         cd examples/installation
         sh build.sh test-ios-objc-cocoapods
         sh build.sh test-ios-objc-cocoapods-dynamic
-        if [ "$REALM_SWIFT_VERSION" = "3.0" ]; then # Skip Swift 3 & watchOS CocoaPods for now.
+        if [ "$REALM_SWIFT_VERSION" != "2.2" ]; then # Skip Swift 2.3/3.0 & watchOS CocoaPods for now.
             sh build.sh test-osx-objc-cocoapods
             exit 0
         fi
@@ -751,7 +751,7 @@ case "$COMMAND" in
         ;;
 
     "examples-ios-swift")
-        if [ "$REALM_SWIFT_VERSION" = "3.0" ]; then # Skip Swift 3 examples for now.
+        if [ "$REALM_SWIFT_VERSION" != "2.2" ]; then # Skip Swift 2.3/3.0 examples for now.
             exit 0
         fi
         sh build.sh prelaunch-simulator
@@ -779,7 +779,7 @@ case "$COMMAND" in
         ;;
 
     "examples-tvos-swift")
-        if [ "$REALM_SWIFT_VERSION" = "3.0" ]; then # Skip Swift 3 examples for now.
+        if [ "$REALM_SWIFT_VERSION" != "2.2" ]; then # Skip Swift 2.3/3.0 examples for now.
             exit 0
         fi
         workspace="examples/tvos/swift/RealmExamples.xcworkspace"

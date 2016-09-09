@@ -11,6 +11,8 @@ while pgrep -q Simulator; do
     pkill -9 Simulator 2>/dev/null || true
 done
 
+exit 0
+
 # Shut down simulators until there's no booted ones left
 # Only do one at a time because devices sometimes show up multiple times
 while xcrun simctl list | grep -q Booted; do

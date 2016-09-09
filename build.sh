@@ -921,6 +921,9 @@ EOM
             # Verify that no Realm files still exist
             ! find ~/Library/Developer/CoreSimulator/Devices/ -name '*.realm' | grep -q .
 
+            # Enable a huge amount of Xcode logging, hoping that it helps us identify why certain iOS jobs are failing.
+            defaults write com.apple.dt.Xcode DVTDefaultLogLevel 9
+
             sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || \
                 (echo "\n\n***\nbuild/build.log\n***\n\n" && cat build/build.log && exit 1)
         fi

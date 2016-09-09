@@ -922,7 +922,7 @@ EOM
             ! find ~/Library/Developer/CoreSimulator/Devices/ -name '*.realm' | grep -q .
 
             # Enable a huge amount of Xcode logging, hoping that it helps us identify why certain iOS jobs are failing.
-            defaults delete com.apple.dt.Xcode DVTDefaultLogLevel
+            defaults delete com.apple.dt.Xcode DVTDefaultLogLevel || true
             defaults write com.apple.CoreSimulator DebugLogging -bool YES
 
             sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || \

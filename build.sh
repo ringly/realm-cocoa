@@ -927,8 +927,8 @@ EOM
 
             local failed=0
             sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
-            if [ "$failed" = "1" ] && cat build/build.log | grep "Connection peer refused channel request"; then
-                # Run again if "Connection peer refused channel request" error occurs
+            if [ "$failed" = "1" ] && cat build/build.log | grep -E 'XTXProxyChannel|DTXChannel'; then
+                # Run again if a known Xcode error occurs
                 failed=0
                 sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
             fi

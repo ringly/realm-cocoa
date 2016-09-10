@@ -39,7 +39,7 @@ while xcrun simctl list devices -j | jq -c -r '.devices | flatten | map(select(.
 done
 
 # Sleep a bit before trying to open a URL because otherwise it somehow lengthens the boot time
-sleep 10
+sleep 30
 
 # Wait until the simulator is fully booted by waiting for it to open a URL
 until xcrun simctl openurl booted https://realm.io 2>/dev/null; do

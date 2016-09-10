@@ -925,9 +925,18 @@ EOM
             defaults delete com.apple.dt.Xcode DVTDefaultLogLevel || true
             defaults write com.apple.CoreSimulator DebugLogging -bool YES
 
-            sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || \
-                (echo "\n\n***\nbuild/build.log\n***\n\n" && cat build/build.log && 
-                 echo "\n\n***\nCoreSimulator.log\n***\n\n" && tail -n2000 ~/Library/Logs/CoreSimulator/CoreSimulator.log && exit 1)
+            local failed=0
+            sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
+            if [ "$failed" = "1" ] && cat build/build.log | grep "Connection peer refused channel request"; then
+                # Run again if "Connection peer refused channel request" error occurs
+                failed=0
+                sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
+            fi
+            if [ "$failed" = "1" ]; then
+                echo "\n\n***\nbuild/build.log\n***\n\n" && cat build/build.log
+                echo "\n\n***\nCoreSimulator.log\n***\n\n" && tail -n2000 ~/Library/Logs/CoreSimulator/CoreSimulator.log
+                exit 1
+            fi
         fi
 
         if [ "$target" = "osx" ] && [ "$configuration" = "Debug" ]; then

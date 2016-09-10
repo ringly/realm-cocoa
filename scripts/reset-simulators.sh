@@ -22,8 +22,8 @@ xcrun simctl list devices -j | jq -c -r '.devices | flatten | map(select(.availa
 done
 
 # Erase all available simulators
+echo "erasing simulators"
 xcrun simctl list devices -j | jq -c -r '.devices | flatten | map(select(.availability == "(available)")) | map(.udid) | .[]' | while read udid; do
-    echo "erasing simulator with ID: $udid"
     xcrun simctl erase $udid &
 done
 wait
@@ -38,12 +38,6 @@ while xcrun simctl list devices -j | jq -c -r '.devices | flatten | map(select(.
     sleep 1
 done
 
-# Sleep a bit before trying to open a URL because otherwise it somehow lengthens the boot time
-sleep 30
-
-# Wait until the simulator is fully booted by waiting for it to open a URL
-until xcrun simctl openurl booted https://realm.io 2>/dev/null; do
-    sleep 1
-done
-
+# Wait until the simulator is fully booted by waiting for it to launch SpringBoard
+xcrun simctl launch booted com.apple.springboard
 echo "simulator booted"

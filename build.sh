@@ -925,7 +925,7 @@ EOM
             defaults delete com.apple.dt.Xcode DVTDefaultLogLevel || true
             defaults write com.apple.CoreSimulator DebugLogging -bool YES
 
-            local failed=0
+            failed=0
             sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
             if [ "$failed" = "1" ] && cat build/build.log | grep -E 'XTXProxyChannel|DTXChannel'; then
                 # Run again if a known Xcode error occurs

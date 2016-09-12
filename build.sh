@@ -921,10 +921,8 @@ EOM
             # Verify that no Realm files still exist
             ! find ~/Library/Developer/CoreSimulator/Devices/ -name '*.realm' | grep -q .
 
-            defaults delete com.apple.CoreSimulator DebugLogging || true
-
             failed=0
-            sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
+            sh build.sh verify-$target 2>&1 | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
             if [ "$failed" = "1" ] && cat build/build.log | grep -E 'DTXProxyChannel|DTXChannel'; then
                 echo "Known Xcode error detected. Running job again."
                 failed=0

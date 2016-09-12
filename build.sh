@@ -921,13 +921,11 @@ EOM
             # Verify that no Realm files still exist
             ! find ~/Library/Developer/CoreSimulator/Devices/ -name '*.realm' | grep -q .
 
-            # Enable a huge amount of Xcode logging, hoping that it helps us identify why certain iOS jobs are failing.
-            defaults delete com.apple.dt.Xcode DVTDefaultLogLevel || true
-            defaults write com.apple.CoreSimulator DebugLogging -bool YES
+            defaults delete com.apple.CoreSimulator DebugLogging || true
 
             failed=0
             sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1
-            if [ "$failed" = "1" ] && cat build/build.log | grep -E 'XTXProxyChannel|DTXChannel'; then
+            if [ "$failed" = "1" ] && cat build/build.log | grep -E 'DTXProxyChannel|DTXChannel'; then
                 echo "Known Xcode error detected. Running job again."
                 failed=0
                 sh build.sh verify-$target | tee build/build.log | xcpretty -r junit -o build/reports/junit.xml || failed=1

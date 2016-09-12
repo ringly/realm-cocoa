@@ -1,44 +1,51 @@
-get_swift_version() {
-    swift_command=$@
-    $swift_command --version 2>/dev/null | sed -ne 's/^Apple Swift version \([^\b ]*\).*/\1/p'
+#!/usr/bin/env bash
+
+: ${REALM_SWIFT_VERSION:=3.0}
+
+if ! [ -z "${TOOLCHAINS}" ]; then
+  # exiting early since TOOLCHAINS has already been set
+  return
+fi
+
+clean_swift_version() {
+  version="$1"
+
+  # echo "getting clean version for $version"
+  if [ "$version" == "XcodeDefault" ]; then
+    version_line="$(env DEVELOPER_DIR="$xcode" xcrun swift --version | head -n1)"
+    version="swift-$(echo "$version_line" | cut -d " " -f 4)"
+  fi
+
+  # Swift toolchains start with `swift-`.
+  # For example: swift-DEVELOPMENT-SNAPSHOT-2016-05-09-a
+  version="${version##swift-}"
+
+  # Xcode swift toolchains start with `Swift_`.
+  # For example: Swift_2.3
+  version="${version##Swift_}"
+  echo "$version"
 }
 
 find_xcode_for_swift() {
-    # First check if the currently active one is fine
-    version="$(get_swift_version xcrun swift || true)"
-    if [[ "$version" = "$1" ]]; then
-        export DEVELOPER_DIR="$(xcode-select -p)"
-        return 0
-    fi
+  requested_swift_version="$1"
+  XCODES="$(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" 2>/dev/null)"
+  for xcode in $XCODES; do
+    dev_dir="$xcode/Contents/Developer"
 
-    local xcodes dev_dir version
+    for toolchain_path in "$dev_dir/Toolchains"/*; do
+      if [[ "$toolchain_path" == *".xctoolchain" ]] && [ -d "$toolchain_path" ]; then
+        version=$(clean_swift_version "$(basename ${toolchain_path##*/} .xctoolchain)")
 
-    # Check all installed copies of Xcode for the desired Swift version
-    xcodes=()
-    dev_dir="Contents/Developer"
-    for dir in $(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" 2>/dev/null); do
-        [[ -d "$dir" && -n "$(ls -A "$dir/$dev_dir")" ]] && xcodes+=("$dir/$dev_dir")
+        if [ "$version" == "$requested_swift_version" ]; then
+          export DEVELOPER_DIR="$dev_dir"
+          export TOOLCHAINS="$toolchain_path"
+          return
+        fi
+      fi
     done
-
-    for xcode in "${xcodes[@]}"; do
-        for swift in "$xcode"/Toolchains/*.xctoolchain/usr/bin/swift; do
-            version="$(get_swift_version $swift)"
-            if [[ "$version" = "$1" ]]; then
-                export DEVELOPER_DIR="$xcode"
-                return 0
-            fi
-        done
-    done
-
-    >&2 echo "No version of Xcode found that supports Swift $1"
-    return 1
+  done
+  echo "could not find Swift version $requested_swift_version"
+  exit 1
 }
 
-if [[ "$REALM_SWIFT_VERSION" ]]; then
-    find_xcode_for_swift $REALM_SWIFT_VERSION
-else
-    REALM_SWIFT_VERSION=$(get_swift_version xcrun swift)
-    if [[ -z "$DEVELOPER_DIR" ]]; then
-        export DEVELOPER_DIR="$(xcode-select -p)"
-    fi
-fi
+find_xcode_for_swift $REALM_SWIFT_VERSION
